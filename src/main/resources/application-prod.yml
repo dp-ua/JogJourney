@@ -1,0 +1,46 @@
+#For Docker and Prod server
+server:
+  port: 8181
+#  servlet:
+#    context-path: /iksparser
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: jdbc:postgresql://iks-db/iks_db
+    driver-class-name: org.postgresql.Driver
+    username: ${IKS_DB_USERNAME}
+    password: ${IKS_DB_PASSWORD}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+  output:
+    ansi:
+      enabled: DETECT
+
+telegram:
+  bot:
+    token: ${IKS_TELEGRAM_BOT_TOKEN}
+    name: ${IKS_TELEGRAM_BOT_NAME}
+    reconnectTimeout: 10000
+    adminId: ${IKS_TELEGRAM_ADMIN_ID}
+
+logging:
+  level:
+    root: INFO
+    com.dp_ua: INFO
+    com.dp_ua.iksparser.dba: WARN
+
+  file:
+    name: ./logs/file.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
