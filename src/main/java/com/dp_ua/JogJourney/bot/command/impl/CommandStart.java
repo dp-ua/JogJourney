@@ -19,8 +19,6 @@ public class CommandStart implements CommandInterface {
     public static final String command = "start";
     private final boolean isInTextCommand = false;
     @Autowired
-    private Bot bot;
-    @Autowired
     private ApplicationEventPublisher publisher;
 
     @Override
