@@ -28,6 +28,13 @@ spring:
   output:
     ansi:
       enabled: DETECT
+  mustache:
+    prefix: classpath:/templates/
+    suffix: .html
+  mvc:
+    throw-exception-if-no-handler-found: true
+  resources:
+    add-mappings: false
 
 telegram:
   bot:
@@ -36,21 +43,18 @@ telegram:
     reconnectTimeout: 10000
     adminId: ${IKS_TELEGRAM_ADMIN_ID}
 
-
-google:
-  maps:
-    api:
-      key: ${GOOGLE_API_KEY}
+strava:
+  refreshToken: ${STRAVA_REFRESH_TOKEN}
 
 logging:
   level:
     root: INFO
     com.dp_ua: DEBUG
+    org.springframework.web: DEBUG
 
   file:
     name: ./logs/file.log
   pattern:
     #    just msg
-    console: "%msg%n"
-    #    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
