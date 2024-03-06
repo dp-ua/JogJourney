@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Authorization Success</title>
+    <style>
+        #progressBar {
+            width: 100%;
+            background-color: #f3f3f3;
+        }
+        .bar {
+            width: 0%;
+            height: 30px;
+            background-color: #4caf50;
+            animation: progress 10s linear forwards;
+        }
+        @keyframes progress {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<h2>Authorization code successfully received!</h2>
+<p>Your authorization code: {{code}}</p>
+<p>You'll be redirected back to the bot soon.</p>
+<div id="progressBar">
+    <div class="bar"></div>
+</div>
+<script>
+    setTimeout(function(){ window.location.href='https://t.me/YOUR_BOT_USERNAME' }, 10000);
+</script>
+</body>
+</html>
