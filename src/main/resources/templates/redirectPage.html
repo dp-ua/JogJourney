@@ -1,33 +1,55 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-    <title>Authorization Success</title>
     <style>
-        #progressBar {
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .profile-container {
+            display: flex;
+            width: 800px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .profile-image {
+            width: 30%;
+        }
+        .profile-image img {
+            display: block;
             width: 100%;
-            background-color: #f3f3f3;
+            height: auto;
         }
-        .bar {
-            width: 0%;
-            height: 30px;
-            background-color: #4caf50;
-            animation: progress 10s linear forwards;
-        }
-        @keyframes progress {
-            from { width: 0%; }
-            to { width: 100%; }
+        .profile-info {
+            width: 60%;
+            padding: 20px;
         }
     </style>
 </head>
 <body>
-<h2>Authorization code successfully received!</h2>
-<p>Your authorization code: {{code}}</p>
-<p>You'll be redirected back to the bot soon.</p>
-<div id="progressBar">
-    <div class="bar"></div>
+<div class="profile-container">
+    <div class="profile-image">
+        <img src="{{athlete.profile}}" alt="Profile Picture">
+    </div>
+    <div class="profile-info">
+        <h2>{{athlete.firstname}} {{athlete.lastname}}</h2>
+        <p><strong>ID:</strong> {{athlete.id}}</p>
+        <p><strong>Username:</strong> {{athlete.username}}</p>
+        <p><strong>Sex:</strong> {{athlete.sex}}</p>
+        <p><strong>City:</strong> {{athlete.city}}</p>
+        <p><strong>Country:</strong> {{athlete.country}}</p>
+        <p><strong>Date Created:</strong> {{athlete.created_at}}</p>
+        <p><strong>Last Updated:</strong> {{athlete.updated_at}}</p>
+    </div>
 </div>
-<script>
-    setTimeout(function(){ window.location.href='https://t.me/YOUR_BOT_USERNAME' }, 10000);
-</script>
 </body>
 </html>
