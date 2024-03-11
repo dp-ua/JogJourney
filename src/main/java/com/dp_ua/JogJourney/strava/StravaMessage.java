@@ -15,8 +15,7 @@ import static com.dp_ua.JogJourney.service.MessageCreator.SERVICE;
 public class StravaMessage {
     public SendMessageEvent getGoToStravaAuthPageMessage(String chatId, String url) {
         InlineKeyboardMarkup keyboard = getAuthButtonMarkup(url);
-        SendMessageEvent sendMessageEvent = SERVICE.getSendMessageEvent(chatId, getAuthMessage(), keyboard, null);
-        return sendMessageEvent;
+        return SERVICE.getSendMessageEvent(chatId, getAuthMessage(), keyboard, null);
     }
 
     private String getAuthMessage() {

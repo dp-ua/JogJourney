@@ -24,8 +24,7 @@ public class StravaApi {
 
     public SimpleEntry<StravaToken, StravaAthlete> exchangeCodeForToken(String code) {
         log.info("Get token for code: " + code);
-        SimpleEntry<StravaToken, StravaAthlete> stravaTokenAndAthlete = stravaAuth.tokenExchange(clientId, clientSecret, code);
-        return stravaTokenAndAthlete;
+        return stravaAuth.tokenExchange(clientId, clientSecret, code);
     }
 
     public String getStravaAuthUrl(String chatId) {

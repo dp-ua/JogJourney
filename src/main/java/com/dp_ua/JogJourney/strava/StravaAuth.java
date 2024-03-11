@@ -22,7 +22,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @Component
 public class StravaAuth {
     public static final String STRAVA_API_URL = "https://www.strava.com/api/v3/";
-    private static String STRAVA_OAUTH_TOKEN_URL = STRAVA_API_URL + "oauth/token";
+    private static final String STRAVA_OAUTH_TOKEN_URL = STRAVA_API_URL + "oauth/token";
     public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 
     public SimpleEntry<StravaToken, StravaAthlete> tokenExchange(String clientId, String clientSecret, String code) {
@@ -38,8 +38,7 @@ public class StravaAuth {
         StravaTokenResponse stravaTokenResponse = new StravaTokenResponse(response.body());
         StravaToken token = stravaTokenResponse.getStravaToken();
         StravaAthlete athlete = stravaTokenResponse.getAthlete();
-        SimpleEntry<StravaToken, StravaAthlete> result = new SimpleEntry<>(token, athlete);
-        return result;
+        return new SimpleEntry<>(token, athlete);
     }
 
     public StravaToken tokenRefresh(String clientId, String clientSecret, String refreshToken) {
@@ -58,14 +57,13 @@ public class StravaAuth {
     }
 
     private HttpResponse<String> makeRequest(Map<Object, Object> data, String url) {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .POST(buildFormDataFromMap(data))
-                .uri(URI.create(url))
-                .header("Content-Type", APPLICATION_X_WWW_FORM_URLENCODED)
-                .build();
         HttpResponse<String> response;
-        try {
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .POST(buildFormDataFromMap(data))
+                    .uri(URI.create(url))
+                    .header("Content-Type", APPLICATION_X_WWW_FORM_URLENCODED)
+                    .build();
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
             // todo throw exception if response code is not 200
             //  401 - Unauthorized
@@ -101,7 +99,7 @@ public class StravaAuth {
         var builder = new StringBuilder();
 
         for (Map.Entry<Object, Object> entry : data.entrySet()) {
-            if (builder.length() > 0) {
+            if (!builder.isEmpty()) {
                 builder.append("&");
             }
             builder.append(encode(entry.getKey().toString(), UTF_8));
