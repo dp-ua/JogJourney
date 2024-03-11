@@ -1,6 +1,9 @@
 package com.dp_ua.JogJourney;
 
 import com.dp_ua.JogJourney.bot.Bot;
+import com.dp_ua.JogJourney.strava.StravaApi;
+import com.dp_ua.JogJourney.strava.StravaFacade;
+import com.dp_ua.JogJourney.strava.StravaFacadeImpl;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +27,11 @@ public class AppConfig {
     @Value("${telegram.bot.name}")
     private String botUserName;
 
+    @Value("${strava.client.id}")
+    private String clientId;
+    @Value("${strava.client.secret}")
+    private String clientSecret;
+
 
     @Bean
     public Bot bot() {
@@ -41,5 +49,15 @@ public class AppConfig {
     @Bean
     public TelegramBotsApi telegramBotsApi() throws TelegramApiException {
         return new TelegramBotsApi(DefaultBotSession.class);
+    }
+
+    @Bean
+    public StravaFacade stravaFacade() {
+        return new StravaFacadeImpl();
+    }
+
+    @Bean
+    public StravaApi stravaOperator() {
+        return new StravaApi(clientId, clientSecret);
     }
 }

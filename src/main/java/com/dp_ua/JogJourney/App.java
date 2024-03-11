@@ -7,9 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.generics.BotSession;
 
-//@Component
+@Component
 @Slf4j
 public class App implements ApplicationListener<ContextRefreshedEvent>, Ordered {
     @Autowired
