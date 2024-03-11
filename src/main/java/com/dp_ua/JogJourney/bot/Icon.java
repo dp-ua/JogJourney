@@ -1,6 +1,7 @@
 package com.dp_ua.JogJourney.bot;
 
 public enum Icon {
+    WAIT("⏳"),
     MESSAGE("📩"),
     SUBSCRIBE("🔔"),
     UNSUBSCRIBE("🔕"),
