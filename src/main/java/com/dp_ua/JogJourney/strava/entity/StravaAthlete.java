@@ -12,9 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 public class StravaAthlete {
     private long id;
     private String username;
-    private String resourceState;
     private String firstname;
     private String lastname;
+    private String sex;
     private String city;
     private String country;
+    private String profile;
+    private String created_at;
+    private String updated_at;
 }
