@@ -1,6 +1,6 @@
 package com.dp_ua.JogJourney.bot.command;
 
-import com.dp_ua.JogJourney.exeption.NotForMeException;
+import com.dp_ua.JogJourney.exception.NotForMeException;
 
 import java.util.List;
 

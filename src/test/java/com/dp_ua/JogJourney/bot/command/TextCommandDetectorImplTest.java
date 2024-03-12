@@ -2,7 +2,7 @@ package com.dp_ua.JogJourney.bot.command;
 
 import com.dp_ua.JogJourney.App;
 import com.dp_ua.JogJourney.bot.Bot;
-import com.dp_ua.JogJourney.exeption.NotForMeException;
+import com.dp_ua.JogJourney.exception.NotForMeException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

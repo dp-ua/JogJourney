@@ -6,7 +6,7 @@ import com.dp_ua.JogJourney.bot.command.TextCommandDetectorService;
 import com.dp_ua.JogJourney.bot.message.Message;
 import com.dp_ua.JogJourney.bot.message.SelfMessage;
 import com.dp_ua.JogJourney.bot.event.GetMessageEvent;
-import com.dp_ua.JogJourney.exeption.NotForMeException;
+import com.dp_ua.JogJourney.exception.NotForMeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;

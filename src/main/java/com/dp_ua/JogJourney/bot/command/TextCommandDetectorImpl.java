@@ -1,7 +1,7 @@
 package com.dp_ua.JogJourney.bot.command;
 
 import com.dp_ua.JogJourney.bot.Bot;
-import com.dp_ua.JogJourney.exeption.NotForMeException;
+import com.dp_ua.JogJourney.exception.NotForMeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

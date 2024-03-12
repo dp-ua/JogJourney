@@ -1,7 +1,7 @@
 package com.dp_ua.JogJourney.bot.command;
 
 import com.dp_ua.JogJourney.SpringApp;
-import com.dp_ua.JogJourney.exeption.DuplicateCommandException;
+import com.dp_ua.JogJourney.exception.DuplicateCommandException;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
