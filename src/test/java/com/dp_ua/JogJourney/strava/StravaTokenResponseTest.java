@@ -20,15 +20,15 @@ public class StravaTokenResponseTest {
         assertEquals("8e124b843...", token.getAccessToken());
 
         StravaAthlete athlete = response.getAthlete();
-        assertEquals(1234567, athlete.getId());
+        assertEquals(1234567, athlete.getStravaId());
         assertEquals("username", athlete.getUsername());
         assertEquals("firstName", athlete.getFirstname());
         assertEquals("lastName", athlete.getLastname());
         assertEquals("City", athlete.getCity());
         assertEquals("Country", athlete.getCountry());
         assertEquals("M", athlete.getSex());
-        assertEquals("2020-07-20T09:25:54Z", athlete.getCreated_at());
-        assertEquals("2023-10-21T08:04:52Z", athlete.getUpdated_at());
+        assertEquals("2020-07-20T09:25:54Z", athlete.getStravaCreatedAt());
+        assertEquals("2023-10-21T08:04:52Z", athlete.getStravaUpdatedAt());
         assertEquals("https://dgalywyr863hv.cloudfront.net/pictures/athletes/64265136/27242468/1/large.jpg", athlete.getProfile());
     }
 

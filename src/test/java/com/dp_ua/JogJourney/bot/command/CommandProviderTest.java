@@ -33,7 +33,8 @@ public class CommandProviderTest {
         Assert.assertEquals(
                 """
                         help
-                        start""",
+                        start
+                        auth""",
                 actual);
     }
 }

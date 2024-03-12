@@ -1,16 +1,22 @@
 package com.dp_ua.JogJourney.strava.entity;
 
-import lombok.*;
-import lombok.extern.slf4j.Slf4j;
+import com.dp_ua.JogJourney.dba.element.DomainElement;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Entity;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
-@EqualsAndHashCode
+@Entity
+@AllArgsConstructor
 @NoArgsConstructor
-@ToString
-@Slf4j
-public class StravaAthlete {
-    private long id;
+public class StravaAthlete extends DomainElement {
+    @JsonProperty("id")
+    private long stravaId;
+    private String chatId;
     private String username;
     private String firstname;
     private String lastname;
@@ -18,6 +24,28 @@ public class StravaAthlete {
     private String city;
     private String country;
     private String profile;
-    private String created_at;
-    private String updated_at;
+    @JsonProperty("created_at")
+    private String stravaCreatedAt;
+    @JsonProperty("updated_at")
+    private String stravaUpdatedAt;
+
+    @Override
+    public String toString() {
+        return "StravaAthlete{" +
+                "stravaId=" + stravaId +
+                ", chatId='" + chatId + '\'' +
+                ", username='" + username + '\'' +
+                ", firstname='" + firstname + '\'' +
+                ", lastname='" + lastname + '\'' +
+                ", sex='" + sex + '\'' +
+                ", city='" + city + '\'' +
+                ", country='" + country + '\'' +
+                ", profile='" + profile + '\'' +
+                ", stravaCreatedAt='" + stravaCreatedAt + '\'' +
+                ", stravaUpdatedAt='" + stravaUpdatedAt + '\'' +
+                ", id=" + id +
+                ", created=" + created +
+                ", updated=" + updated +
+                '}';
+    }
 }

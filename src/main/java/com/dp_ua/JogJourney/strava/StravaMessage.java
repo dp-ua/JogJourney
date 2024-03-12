@@ -44,4 +44,12 @@ public class StravaMessage {
         keyboard.setKeyboard(rows);
         return keyboard;
     }
+
+    public SendMessageEvent getAlreadyAuthMessage(String chatId) {
+        return SERVICE.getSendMessageEvent(chatId, "Бот вже авторизований в Strava\n\n Token дійсний", null, null);
+    }
+
+    public SendMessageEvent getRefreshTokenMessage(String chatId) {
+        return SERVICE.getSendMessageEvent(chatId, "Бот вже авторизований в Strava\n\n Token оновлено", null, null);
+    }
 }

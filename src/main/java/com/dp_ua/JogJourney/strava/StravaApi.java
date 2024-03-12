@@ -2,32 +2,112 @@ package com.dp_ua.JogJourney.strava;
 
 import com.dp_ua.JogJourney.strava.entity.StravaAthlete;
 import com.dp_ua.JogJourney.strava.entity.StravaToken;
+import com.dp_ua.JogJourney.strava.entity.StravaTokenResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.HashMap;
+import java.util.Map;
+
+import static java.net.URLEncoder.encode;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Slf4j
+@Component
 public class StravaApi {
-    private final String clientId;
-    private final String clientSecret;
-    public static final String STRAVA_URL = "https://www.strava.com/oauth";
-    private final static String STRAVA_AUTH_URL = STRAVA_URL + "/authorize?client_id={YOUR_CLIENT_ID}&redirect_uri={YOUR_REDIRECT_URI}&response_type=code&scope=read,profile:read_all,activity:read_all";
-    private final static String REDIRECTION_URL = "http://localhost:8080/strava/redirect?chatId={chatId}";
-    @Autowired
-    StravaAuth stravaAuth;
+    public static final String STRAVA_API_URL = "https://www.strava.com/api/v3/";
+    private static final String STRAVA_OAUTH_TOKEN_URL = STRAVA_API_URL + "oauth/token";
+    public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 
-    public StravaApi(String clientId, String clientSecret) {
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
+    public SimpleEntry<StravaToken, StravaAthlete> tokenExchange(String clientId, String clientSecret, String code) {
+        Map<Object, Object> data = prepareTokenExchangeData(clientId, clientSecret, code);
+
+        HttpResponse<String> response = makeRequest(data, STRAVA_OAUTH_TOKEN_URL);
+
+        if (response.statusCode() != 200) {
+            log.error("Error during token exchange. Response code: " + response.statusCode());
+            throw new RuntimeException("Error during token exchange. Response code: " + response.statusCode());
+        }
+        log.debug("tokenExchange: " + response.body());
+        StravaTokenResponse stravaTokenResponse = new StravaTokenResponse(response.body());
+        StravaToken token = stravaTokenResponse.getStravaToken();
+        StravaAthlete athlete = stravaTokenResponse.getAthlete();
+        return new SimpleEntry<>(token, athlete);
     }
 
-    public SimpleEntry<StravaToken, StravaAthlete> exchangeCodeForToken(String code) {
-        log.info("Get token for code: " + code);
-        return stravaAuth.tokenExchange(clientId, clientSecret, code);
+    public StravaToken tokenRefresh(String clientId, String clientSecret, String refreshToken) {
+        Map<Object, Object> data = prepareTokenRefreshData(clientId, clientSecret, refreshToken);
+
+        HttpResponse<String> response = makeRequest(data, STRAVA_OAUTH_TOKEN_URL);
+
+        if (response.statusCode() != 200) {
+            log.error("Error during token refresh. Response code: " + response.statusCode());
+            throw new RuntimeException("Error during token refresh. Response code: " + response.statusCode());
+        }
+        StravaToken token = new StravaTokenResponse(response.body()).getStravaToken();
+        log.debug("tokenRefresh: " + token);
+
+        return token;
     }
 
-    public String getStravaAuthUrl(String chatId) {
-        return STRAVA_AUTH_URL.replace("{YOUR_CLIENT_ID}", clientId).replace("{YOUR_REDIRECT_URI}", REDIRECTION_URL.replace("{chatId}", chatId));
+    private HttpResponse<String> makeRequest(Map<Object, Object> data, String url) {
+        HttpResponse<String> response;
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .POST(buildFormDataFromMap(data))
+                .uri(URI.create(url))
+                .header("Content-Type", APPLICATION_X_WWW_FORM_URLENCODED)
+                .build();
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            // todo throw exception if response code is not 200
+            //  401 - Unauthorized
+            //  403 - Forbidden
+            //  404 - Not Found
+            //  429 - Too Many Requests
+        } catch (IOException | InterruptedException e) {
+            log.error("Error during sending request", e);
+            throw new RuntimeException(e);
+        }
+        return response;
+    }
+
+    private Map<Object, Object> prepareTokenExchangeData(String clientId, String clientSecret, String code) {
+        Map<Object, Object> data = new HashMap<>();
+        data.put("client_id", clientId);
+        data.put("client_secret", clientSecret);
+        data.put("code", code);
+        data.put("grant_type", "authorization_code");
+        return data;
+    }
+
+    private Map<Object, Object> prepareTokenRefreshData(String clientId, String clientSecret, String refreshToken) {
+        Map<Object, Object> data = new HashMap<>();
+        data.put("client_id", clientId);
+        data.put("client_secret", clientSecret);
+        data.put("refresh_token", refreshToken);
+        data.put("grant_type", "refresh_token");
+        return data;
+    }
+
+    private HttpRequest.BodyPublisher buildFormDataFromMap(Map<Object, Object> data) {
+        var builder = new StringBuilder();
+
+        for (Map.Entry<Object, Object> entry : data.entrySet()) {
+            if (!builder.isEmpty()) {
+                builder.append("&");
+            }
+            builder.append(encode(entry.getKey().toString(), UTF_8));
+            builder.append("=");
+            builder.append(encode(entry.getValue().toString(), UTF_8));
+        }
+
+        return HttpRequest.BodyPublishers.ofString(builder.toString());
     }
 }
