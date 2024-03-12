@@ -1,5 +1,6 @@
 package com.dp_ua.JogJourney.strava;
 
+import com.dp_ua.JogJourney.exception.StravaApiException;
 import com.dp_ua.JogJourney.strava.entity.StravaAthlete;
 import com.dp_ua.JogJourney.strava.entity.StravaToken;
 import com.dp_ua.JogJourney.strava.entity.StravaTokenResponse;
@@ -28,35 +29,45 @@ public class StravaApi {
     public SimpleEntry<StravaToken, StravaAthlete> tokenExchange(String clientId, String clientSecret, String code) {
         Map<Object, Object> data = prepareTokenExchangeData(clientId, clientSecret, code);
 
-        HttpResponse<String> response = makeRequest(data, STRAVA_OAUTH_TOKEN_URL);
-
-        if (response.statusCode() != 200) {
-            log.error("Error during token exchange. Response code: " + response.statusCode());
-            throw new RuntimeException("Error during token exchange. Response code: " + response.statusCode());
+        try {
+            HttpResponse<String> response = makeRequest(data, STRAVA_OAUTH_TOKEN_URL);
+            log.debug("tokenExchange: " + response.body());
+            StravaTokenResponse stravaTokenResponse = new StravaTokenResponse(response.body());
+            StravaToken token = stravaTokenResponse.getStravaToken();
+            StravaAthlete athlete = stravaTokenResponse.getAthlete();
+            return new SimpleEntry<>(token, athlete);
+        } catch (StravaApiException e) {
+            log.error("Error during token exchange. Response code: " + e.getCode());
+            // todo пока не знаю какие проблемы могут возникнуть при обмене кода на токен
+            throw new RuntimeException("Error during token exchange. Response code: " + e.getCode());
         }
-        log.debug("tokenExchange: " + response.body());
-        StravaTokenResponse stravaTokenResponse = new StravaTokenResponse(response.body());
-        StravaToken token = stravaTokenResponse.getStravaToken();
-        StravaAthlete athlete = stravaTokenResponse.getAthlete();
-        return new SimpleEntry<>(token, athlete);
     }
 
     public StravaToken tokenRefresh(String clientId, String clientSecret, String refreshToken) {
         Map<Object, Object> data = prepareTokenRefreshData(clientId, clientSecret, refreshToken);
 
-        HttpResponse<String> response = makeRequest(data, STRAVA_OAUTH_TOKEN_URL);
+        try {
+            HttpResponse<String> response = makeRequest(data, STRAVA_OAUTH_TOKEN_URL);
+            StravaToken token = new StravaTokenResponse(response.body()).getStravaToken();
+            log.debug("tokenRefresh: " + token);
 
-        if (response.statusCode() != 200) {
-            log.error("Error during token refresh. Response code: " + response.statusCode());
-            throw new RuntimeException("Error during token refresh. Response code: " + response.statusCode());
+            return token;
+        } catch (StravaApiException e) {
+            if (e.getCode() == 401) {
+                log.error("Error during token refresh. Response code: " + e.getCode());
+                // todo throw Event about token refresh error
+                // здесь у нас прерывание обслуживания пользователя, нужно как-то обработать
+                // отменить все запросы к страве, которые делались для этого пользователя
+                // уведомить, что авторизации нет
+                // предложить пройти новую авторизацию
+                throw new RuntimeException("Error during token refresh. Response code: " + e.getCode());
+            }
+            log.error("Error during token refresh", e);
+            throw new RuntimeException(e);
         }
-        StravaToken token = new StravaTokenResponse(response.body()).getStravaToken();
-        log.debug("tokenRefresh: " + token);
-
-        return token;
     }
 
-    private HttpResponse<String> makeRequest(Map<Object, Object> data, String url) {
+    private HttpResponse<String> makeRequest(Map<Object, Object> data, String url) throws StravaApiException {
         HttpResponse<String> response;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -66,11 +77,10 @@ public class StravaApi {
                 .build();
         try {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            // todo throw exception if response code is not 200
-            //  401 - Unauthorized
-            //  403 - Forbidden
-            //  404 - Not Found
-            //  429 - Too Many Requests
+            if (response.statusCode() != 200) {
+                log.error("Error during sending request. Response code: " + response.statusCode());
+                throw new StravaApiException("Error during sending request", response.statusCode());
+            }
         } catch (IOException | InterruptedException e) {
             log.error("Error during sending request", e);
             throw new RuntimeException(e);
