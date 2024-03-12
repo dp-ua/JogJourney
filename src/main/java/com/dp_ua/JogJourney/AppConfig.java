@@ -2,6 +2,7 @@ package com.dp_ua.JogJourney;
 
 import com.dp_ua.JogJourney.bot.Bot;
 import com.dp_ua.JogJourney.strava.StravaApiFacade;
+import com.dp_ua.JogJourney.strava.StravaApiFacadeImpl;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,6 +52,6 @@ public class AppConfig {
 
     @Bean
     public StravaApiFacade stravaOperator() {
-        return new StravaApiFacade(clientId, clientSecret);
+        return new StravaApiFacadeImpl(clientId, clientSecret);
     }
 }
