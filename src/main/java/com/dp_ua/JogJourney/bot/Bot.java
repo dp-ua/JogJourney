@@ -1,7 +1,7 @@
 package com.dp_ua.JogJourney.bot;
 
-import com.dp_ua.JogJourney.bot.message.ReceivedMessage;
 import com.dp_ua.JogJourney.bot.event.GetMessageEvent;
+import com.dp_ua.JogJourney.bot.message.ReceivedMessage;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -22,9 +22,11 @@ public class Bot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         ReceivedMessage message = new ReceivedMessage(update);
+
         log.info("Message: " + message + " Publish Update: " + update.toString().replace("\n", " "));
         GetMessageEvent messageEvent = new GetMessageEvent(this, message);
         publisher.publishEvent(messageEvent);
+
     }
 
     public Bot(String botToken, String botUserName) {
