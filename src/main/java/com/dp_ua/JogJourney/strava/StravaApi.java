@@ -24,13 +24,52 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class StravaApi {
     public static final String STRAVA_API_URL = "https://www.strava.com/api/v3/";
     private static final String STRAVA_OAUTH_TOKEN_URL = STRAVA_API_URL + "oauth/token";
-    public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+    private static final String STRAVA_ATHLETE_ACTIVITIES_URL = STRAVA_API_URL + "athlete/activities";
+        public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+
+    public String getAthleteActivities(long before, long after, int page, int perPage, String token) throws StravaApiException {
+        Map<Object, Object> data = prepareDataForActivitiesRequest(before, after, page, perPage);
+        HttpResponse<String> response = makeGetRequest(data, token, STRAVA_ATHLETE_ACTIVITIES_URL);
+        log.debug("getAthleteActivities: " + response.body());
+        return response.body();
+    }
+
+    private HttpResponse<String> makeGetRequest(Map<Object, Object> data, String token, String url) throws StravaApiException {
+        HttpResponse<String> response;
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(URI.create(url + "?" + buildFormDataFromMap(data)))
+                .header("Authorization", "Bearer " + token)
+                .header("accept", "application/json")
+                .build();
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                log.error("Error during sending request. Response code: " + response.statusCode());
+                throw new StravaApiException("Error during sending request", response.statusCode());
+            }
+        } catch (IOException | InterruptedException e) {
+            log.error("Error during sending request", e);
+            throw new RuntimeException(e);
+        }
+        return response;
+    }
+
+    private Map<Object, Object> prepareDataForActivitiesRequest(long before, long after, int page, int perPage) {
+        Map<Object, Object> data = new HashMap<>();
+        data.put("before", before);
+        data.put("after", after);
+        data.put("page", page);
+        data.put("per_page", perPage);
+        return data;
+    }
 
     public SimpleEntry<StravaToken, StravaAthlete> tokenExchange(String clientId, String clientSecret, String code) {
         Map<Object, Object> data = prepareTokenExchangeData(clientId, clientSecret, code);
 
         try {
-            HttpResponse<String> response = makeRequest(data, STRAVA_OAUTH_TOKEN_URL);
+            HttpResponse<String> response = makePostRequestWithoutAuthorization(data, STRAVA_OAUTH_TOKEN_URL);
             log.debug("tokenExchange: " + response.body());
             StravaTokenResponse stravaTokenResponse = new StravaTokenResponse(response.body());
             StravaToken token = stravaTokenResponse.getStravaToken();
@@ -43,37 +82,30 @@ public class StravaApi {
         }
     }
 
-    public StravaToken tokenRefresh(String clientId, String clientSecret, String refreshToken) {
+    public StravaToken tokenRefresh(String clientId, String clientSecret, String refreshToken) throws StravaApiException {
         Map<Object, Object> data = prepareTokenRefreshData(clientId, clientSecret, refreshToken);
 
-        try {
-            HttpResponse<String> response = makeRequest(data, STRAVA_OAUTH_TOKEN_URL);
-            StravaToken token = new StravaTokenResponse(response.body()).getStravaToken();
-            log.debug("tokenRefresh: " + token);
+        HttpResponse<String> response = makePostRequestWithoutAuthorization(data, STRAVA_OAUTH_TOKEN_URL);
+        StravaToken token = new StravaTokenResponse(response.body()).getStravaToken();
+        log.debug("tokenRefresh: " + token);
 
-            return token;
-        } catch (StravaApiException e) {
-            if (e.getCode() == 401) {
-                log.error("Error during token refresh. Response code: " + e.getCode());
-                // todo throw Event about token refresh error
-                // здесь у нас прерывание обслуживания пользователя, нужно как-то обработать
-                // отменить все запросы к страве, которые делались для этого пользователя
-                // уведомить, что авторизации нет
-                // предложить пройти новую авторизацию
-                throw new RuntimeException("Error during token refresh. Response code: " + e.getCode());
-            }
-            log.error("Error during token refresh", e);
-            throw new RuntimeException(e);
-        }
+        return token;
     }
 
-    private HttpResponse<String> makeRequest(Map<Object, Object> data, String url) throws StravaApiException {
+
+    private HttpResponse<String> makePostRequestWithoutAuthorization(Map<Object, Object> data, String url) throws StravaApiException {
+        return makePostRequest(data, url, null);
+    }
+
+    private HttpResponse<String> makePostRequest(Map<Object, Object> data, String url, String token) throws StravaApiException {
         HttpResponse<String> response;
         HttpClient client = HttpClient.newHttpClient();
+        // add token if it is not null
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(buildFormDataFromMap(data))
                 .uri(URI.create(url))
                 .header("Content-Type", APPLICATION_X_WWW_FORM_URLENCODED)
+                .header("Authorization", "Bearer " + token)
                 .build();
         try {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());

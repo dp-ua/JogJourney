@@ -29,6 +29,7 @@ public class StravaToken extends DomainElement {
     private String refreshToken;
     @JsonProperty("access_token")
     private String accessToken;
+    private boolean active;
 
     public boolean isExpired() {
         Instant now = Instant.now();
@@ -48,6 +49,7 @@ public class StravaToken extends DomainElement {
                 ", id=" + id +
                 ", created=" + created +
                 ", updated=" + updated +
+                ", active=" + active +
                 '}';
     }
 }
