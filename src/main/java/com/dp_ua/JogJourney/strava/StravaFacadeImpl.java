@@ -103,7 +103,7 @@ public class StravaFacadeImpl implements StravaFacade {
             operateStravaApiException(chatId, e);
         } catch (AccountNotFoundException e) {
             log.error("Error during loading athlete activities. {}", e.getMessage());
-            operateAccountNotFoundException(chatId, e);
+            operateAccountNotFoundException(chatId);
         }
     }
 
@@ -119,7 +119,7 @@ public class StravaFacadeImpl implements StravaFacade {
         stravaLogService.save(log);
     }
 
-    private void operateAccountNotFoundException(String chatId, AccountNotFoundException e) {
+    private void operateAccountNotFoundException(String chatId) {
         operateStravaAuth(chatId);
     }
 
@@ -146,7 +146,7 @@ public class StravaFacadeImpl implements StravaFacade {
 
     private StravaToken getStravaTokenForAthlete(StravaAthlete athlete) {
         Optional<StravaToken> token = stravaTokenService.findByStravaId(athlete.getStravaId());
-        return token.isPresent() ? token.get() : null;
+        return token.orElse(null);
     }
 
     private void checkTime(long before, long after) {
@@ -157,6 +157,6 @@ public class StravaFacadeImpl implements StravaFacade {
 
     private StravaAthlete getAthleteForChat(String chatId) {
         Optional<StravaAthlete> athlete = stravaAthleteService.findByChatId(chatId);
-        return athlete.isPresent() ? athlete.get() : null;
+        return athlete.orElse(null);
     }
 }

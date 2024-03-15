@@ -92,9 +92,7 @@ class StravaParserTest {
         String fileContent = "";
         try {
             fileContent = new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(fileName).toURI())));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
+        } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
         log.info("File content: {}", fileContent.replaceAll("\n", ""));
