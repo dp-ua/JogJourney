@@ -4,10 +4,13 @@ package com.dp_ua.JogJourney.strava;
 import com.dp_ua.JogJourney.bot.event.SendMessageEvent;
 import com.dp_ua.JogJourney.dba.service.StravaActivityService;
 import com.dp_ua.JogJourney.dba.service.StravaAthleteService;
+import com.dp_ua.JogJourney.dba.service.StravaLogService;
 import com.dp_ua.JogJourney.dba.service.StravaTokenService;
 import com.dp_ua.JogJourney.exception.StravaApiException;
 import com.dp_ua.JogJourney.strava.entity.StravaActivity;
 import com.dp_ua.JogJourney.strava.entity.StravaAthlete;
+import com.dp_ua.JogJourney.strava.entity.StravaLog;
+import com.dp_ua.JogJourney.strava.entity.StravaLog.StravaLogType;
 import com.dp_ua.JogJourney.strava.entity.StravaToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +21,9 @@ import javax.security.auth.login.AccountNotFoundException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Optional;
+
+import static com.dp_ua.JogJourney.strava.entity.StravaLog.StravaLogType.ACTIVITIES;
+
 
 @Slf4j
 @Component
@@ -34,6 +40,8 @@ public class StravaFacadeImpl implements StravaFacade {
     StravaTokenService stravaTokenService;
     @Autowired
     StravaActivityService stravaActivityService;
+    @Autowired
+    StravaLogService stravaLogService;
 
 
     @Override
@@ -81,11 +89,13 @@ public class StravaFacadeImpl implements StravaFacade {
             List<StravaActivity> activities = stravaApiFacade.loadAthleteActivities(token, before, after);
             log.info("For chatId: " + chatId + " athlete activities: " + activities);
             activities.forEach(activity -> stravaActivityService.saveOnlyNew(activity));
-            // todo schedule will process new activities and inform user about it
-            // TODO подумать над тем, сделать уведомление о новых активностях с помощью schedule или событий
-            /* TODO подумать, нужно ли фиксировать когда было последнее обновление.
-                *  Если да, то нужно ли это делать в этом методе или в отдельном?
-                * либо мы это делаем через вебхуки, либо через schedule
+            logActivityUpdate(chatId, before);
+            /* todo schedule will process new activities and inform user about it
+             * TODO подумать над тем, сделать уведомление о новых активностях с помощью schedule или событий
+             * либо мы это делаем через вебхуки, либо через schedule
+             * ✅ Определились. Вебхуки настраиваются сложно, с какими-то трудностями.
+             * Делаем через schedule
+             * ✅ последнее обновление нужно  фиксировать, чтобы не обрабатывать одни и те же активности
              */
 
         } catch (StravaApiException e) {
@@ -95,6 +105,18 @@ public class StravaFacadeImpl implements StravaFacade {
             log.error("Error during loading athlete activities. {}", e.getMessage());
             operateAccountNotFoundException(chatId, e);
         }
+    }
+
+    private void logActivityUpdate(String chatId, long before) {
+        saveLog(chatId, ACTIVITIES, "before: " + before);
+    }
+
+    private void saveLog(String chatId, StravaLogType type, String details) {
+        StravaLog log = new StravaLog();
+        log.setChatId(chatId);
+        log.setType(type);
+        log.setDetails(details);
+        stravaLogService.save(log);
     }
 
     private void operateAccountNotFoundException(String chatId, AccountNotFoundException e) {
