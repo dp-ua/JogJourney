@@ -11,7 +11,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
 public class StravaAthlete extends DomainElement {
     @JsonProperty("id")
@@ -28,7 +27,6 @@ public class StravaAthlete extends DomainElement {
     private String stravaCreatedAt;
     @JsonProperty("updated_at")
     private String stravaUpdatedAt;
-    private boolean active;
 
     @Override
     public String toString() {
@@ -47,7 +45,6 @@ public class StravaAthlete extends DomainElement {
                 ", id=" + id +
                 ", created=" + created +
                 ", updated=" + updated +
-                ", active=" + active +
                 '}';
     }
 }

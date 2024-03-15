@@ -5,6 +5,7 @@ import com.dp_ua.JogJourney.strava.entity.StravaAthlete;
 import com.dp_ua.JogJourney.strava.entity.StravaToken;
 import com.dp_ua.JogJourney.strava.entity.StravaTokenResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -25,7 +26,9 @@ public class StravaApi {
     public static final String STRAVA_API_URL = "https://www.strava.com/api/v3/";
     private static final String STRAVA_OAUTH_TOKEN_URL = STRAVA_API_URL + "oauth/token";
     private static final String STRAVA_ATHLETE_ACTIVITIES_URL = STRAVA_API_URL + "athlete/activities";
-        public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+    public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+    @Autowired
+    StravaParser parser;
 
     public String getAthleteActivities(long before, long after, int page, int perPage, String token) throws StravaApiException {
         Map<Object, Object> data = prepareDataForActivitiesRequest(before, after, page, perPage);
@@ -39,10 +42,11 @@ public class StravaApi {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
-                .uri(URI.create(url + "?" + buildFormDataFromMap(data)))
+                .uri(URI.create(url + "?" + buildGetRequestData(data)))
                 .header("Authorization", "Bearer " + token)
                 .header("accept", "application/json")
                 .build();
+        log.debug("makeGetRequest: " + request.uri());
         try {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
@@ -71,10 +75,13 @@ public class StravaApi {
         try {
             HttpResponse<String> response = makePostRequestWithoutAuthorization(data, STRAVA_OAUTH_TOKEN_URL);
             log.debug("tokenExchange: " + response.body());
-            StravaTokenResponse stravaTokenResponse = new StravaTokenResponse(response.body());
-            StravaToken token = stravaTokenResponse.getStravaToken();
-            StravaAthlete athlete = stravaTokenResponse.getAthlete();
-            return new SimpleEntry<>(token, athlete);
+
+            StravaTokenResponse stravaTokenResponse = parser.parseTokenResponse(response.body());
+
+            return new SimpleEntry<>(
+                    new StravaToken(stravaTokenResponse),
+                    stravaTokenResponse.getAthlete()
+            );
         } catch (StravaApiException e) {
             log.error("Error during token exchange. Response code: " + e.getCode());
             // todo пока не знаю какие проблемы могут возникнуть при обмене кода на токен
@@ -86,7 +93,10 @@ public class StravaApi {
         Map<Object, Object> data = prepareTokenRefreshData(clientId, clientSecret, refreshToken);
 
         HttpResponse<String> response = makePostRequestWithoutAuthorization(data, STRAVA_OAUTH_TOKEN_URL);
-        StravaToken token = new StravaTokenResponse(response.body()).getStravaToken();
+
+        StravaTokenResponse stravaTokenResponse = parser.parseTokenResponse(response.body());
+        StravaToken token = new StravaToken(stravaTokenResponse);
+
         log.debug("tokenRefresh: " + token);
 
         return token;
@@ -102,7 +112,7 @@ public class StravaApi {
         HttpClient client = HttpClient.newHttpClient();
         // add token if it is not null
         HttpRequest request = HttpRequest.newBuilder()
-                .POST(buildFormDataFromMap(data))
+                .POST(buildBodyFormData(data))
                 .uri(URI.create(url))
                 .header("Content-Type", APPLICATION_X_WWW_FORM_URLENCODED)
                 .header("Authorization", "Bearer " + token)
@@ -138,7 +148,17 @@ public class StravaApi {
         return data;
     }
 
-    private HttpRequest.BodyPublisher buildFormDataFromMap(Map<Object, Object> data) {
+    private HttpRequest.BodyPublisher buildBodyFormData(Map<Object, Object> data) {
+        var builder = getMappedStringData(data);
+        return HttpRequest.BodyPublishers.ofString(builder.toString());
+    }
+
+    private String buildGetRequestData(Map<Object, Object> data) {
+        var builder = getMappedStringData(data);
+        return builder.toString();
+    }
+
+    private StringBuilder getMappedStringData(Map<Object, Object> data) {
         var builder = new StringBuilder();
 
         for (Map.Entry<Object, Object> entry : data.entrySet()) {
@@ -149,7 +169,6 @@ public class StravaApi {
             builder.append("=");
             builder.append(encode(entry.getValue().toString(), UTF_8));
         }
-
-        return HttpRequest.BodyPublishers.ofString(builder.toString());
+        return builder;
     }
 }

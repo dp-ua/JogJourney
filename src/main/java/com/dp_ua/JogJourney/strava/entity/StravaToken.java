@@ -3,7 +3,6 @@ package com.dp_ua.JogJourney.strava.entity;
 import com.dp_ua.JogJourney.dba.element.DomainElement;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,7 +13,6 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
 @Slf4j
 public class StravaToken extends DomainElement {
@@ -29,12 +27,19 @@ public class StravaToken extends DomainElement {
     private String refreshToken;
     @JsonProperty("access_token")
     private String accessToken;
-    private boolean active;
 
     public boolean isExpired() {
         Instant now = Instant.now();
         Instant expires = Instant.ofEpochMilli(expiresAt);
         return expires.isBefore(now);
+    }
+
+    public StravaToken(StravaTokenResponse response) {
+        this.tokenType = response.getTokenType();
+        this.expiresAt = response.getExpiresAt();
+        this.expiresIn = response.getExpiresIn();
+        this.refreshToken = response.getRefreshToken();
+        this.accessToken = response.getAccessToken();
     }
 
     @Override
@@ -49,7 +54,6 @@ public class StravaToken extends DomainElement {
                 ", id=" + id +
                 ", created=" + created +
                 ", updated=" + updated +
-                ", active=" + active +
                 '}';
     }
 }
