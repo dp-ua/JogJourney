@@ -21,6 +21,7 @@ public class DomainElement {
     protected Date created;
 
     protected Date updated;
+    protected Status status = Status.NEW;
 
     @PrePersist
     protected void onCreate() {
@@ -40,5 +41,10 @@ public class DomainElement {
                 .replaceAll("\\+", "%2B")
                 .replaceAll("\\(", "%2F")
                 .replaceAll("\\)", "%29");
+    }
+    public enum Status {
+        ACTIVE,
+        DELETED,
+        NEW
     }
 }
