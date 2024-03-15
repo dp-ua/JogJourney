@@ -31,6 +31,9 @@ public class AppConfig {
     @Value("${strava.client.secret}")
     private String clientSecret;
 
+    @Value("${strava.redirectionUrl}")
+    private String redirectionUrl;
+
 
     @Bean
     public Bot bot() {
@@ -52,6 +55,7 @@ public class AppConfig {
 
     @Bean
     public StravaApiFacade stravaOperator() {
-        return new StravaApiFacadeImpl(clientId, clientSecret);
+        log.debug("Create StravaApiFacadeImpl with clientId: " + clientId + " clientSecret: " + clientSecret + " redirectionUrl: " + redirectionUrl);
+        return new StravaApiFacadeImpl(clientId, clientSecret, redirectionUrl);
     }
 }
