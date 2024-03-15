@@ -2,9 +2,11 @@ package com.dp_ua.JogJourney.strava;
 
 
 import com.dp_ua.JogJourney.bot.event.SendMessageEvent;
+import com.dp_ua.JogJourney.dba.service.StravaActivityService;
 import com.dp_ua.JogJourney.dba.service.StravaAthleteService;
 import com.dp_ua.JogJourney.dba.service.StravaTokenService;
 import com.dp_ua.JogJourney.exception.StravaApiException;
+import com.dp_ua.JogJourney.strava.entity.StravaActivity;
 import com.dp_ua.JogJourney.strava.entity.StravaAthlete;
 import com.dp_ua.JogJourney.strava.entity.StravaToken;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import javax.security.auth.login.AccountNotFoundException;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -29,6 +32,8 @@ public class StravaFacadeImpl implements StravaFacade {
     StravaAthleteService stravaAthleteService;
     @Autowired
     StravaTokenService stravaTokenService;
+    @Autowired
+    StravaActivityService stravaActivityService;
 
 
     @Override
@@ -73,23 +78,27 @@ public class StravaFacadeImpl implements StravaFacade {
                 token = refreshToken(token);
             }
 
-            String activities = stravaApiFacade.loadAthleteActivities(token, before, after);
+            List<StravaActivity> activities = stravaApiFacade.loadAthleteActivities(token, before, after);
             log.info("For chatId: " + chatId + " athlete activities: " + activities);
-            // todo save activities
-            // todo send message to user
+            activities.forEach(activity -> stravaActivityService.saveOnlyNew(activity));
+            // todo schedule will process new activities and inform user about it
+            // TODO подумать над тем, сделать уведомление о новых активностях с помощью schedule или событий
+            /* TODO подумать, нужно ли фиксировать когда было последнее обновление.
+                *  Если да, то нужно ли это делать в этом методе или в отдельном?
+                * либо мы это делаем через вебхуки, либо через schedule
+             */
 
         } catch (StravaApiException e) {
             log.error("Error during loading athlete activities", e);
             operateStravaApiException(chatId, e);
         } catch (AccountNotFoundException e) {
-            log.error("Error during loading athlete activities", e);
+            log.error("Error during loading athlete activities. {}", e.getMessage());
             operateAccountNotFoundException(chatId, e);
         }
     }
 
     private void operateAccountNotFoundException(String chatId, AccountNotFoundException e) {
         operateStravaAuth(chatId);
-        log.error("AccountNotFoundException, Not Implemented yet", e);
     }
 
     private void operateStravaApiException(String chatId, StravaApiException e) {
