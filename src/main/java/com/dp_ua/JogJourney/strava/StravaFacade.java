@@ -1,6 +1,6 @@
 package com.dp_ua.JogJourney.strava;
 
-import com.dp_ua.JogJourney.strava.entity.StravaAthlete;
+import com.dp_ua.JogJourney.dba.element.StravaAthlete;
 
 public interface StravaFacade {
     void operateStravaAuth(String chatId);

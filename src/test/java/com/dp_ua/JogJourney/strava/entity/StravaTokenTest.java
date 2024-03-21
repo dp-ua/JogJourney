@@ -1,5 +1,6 @@
 package com.dp_ua.JogJourney.strava.entity;
 
+import com.dp_ua.JogJourney.dba.element.StravaToken;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

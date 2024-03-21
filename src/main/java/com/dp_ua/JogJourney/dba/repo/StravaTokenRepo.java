@@ -1,6 +1,6 @@
 package com.dp_ua.JogJourney.dba.repo;
 
-import com.dp_ua.JogJourney.strava.entity.StravaToken;
+import com.dp_ua.JogJourney.dba.element.StravaToken;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;

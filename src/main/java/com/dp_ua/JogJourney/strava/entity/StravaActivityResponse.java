@@ -1,5 +1,6 @@
 package com.dp_ua.JogJourney.strava.entity;
 
+import com.dp_ua.JogJourney.dba.element.StravaAthlete;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

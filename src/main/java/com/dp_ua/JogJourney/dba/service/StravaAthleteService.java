@@ -1,7 +1,7 @@
 package com.dp_ua.JogJourney.dba.service;
 
 import com.dp_ua.JogJourney.dba.repo.StravaAthleteRepo;
-import com.dp_ua.JogJourney.strava.entity.StravaAthlete;
+import com.dp_ua.JogJourney.dba.element.StravaAthlete;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

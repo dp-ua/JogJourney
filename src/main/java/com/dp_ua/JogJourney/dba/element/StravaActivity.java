@@ -1,6 +1,6 @@
-package com.dp_ua.JogJourney.strava.entity;
+package com.dp_ua.JogJourney.dba.element;
 
-import com.dp_ua.JogJourney.dba.element.DomainElement;
+import com.dp_ua.JogJourney.strava.entity.StravaActivityResponse;
 import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,5 +33,15 @@ public class StravaActivity extends DomainElement {
         this.type = response.getType();
         this.sportType = response.getSportType();
         this.startDate = response.getStartDate();
+    }
+
+    public void applyChanges(StravaActivity activity) {
+        this.name = activity.getName();
+        this.distance = activity.getDistance();
+        this.movingTime = activity.getMovingTime();
+        this.elapsedTime = activity.getElapsedTime();
+        this.type = activity.getType();
+        this.sportType = activity.getSportType();
+        this.startDate = activity.getStartDate();
     }
 }

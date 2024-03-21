@@ -1,7 +1,7 @@
 package com.dp_ua.JogJourney.web;
 
 import com.dp_ua.JogJourney.strava.StravaFacade;
-import com.dp_ua.JogJourney.strava.entity.StravaAthlete;
+import com.dp_ua.JogJourney.dba.element.StravaAthlete;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

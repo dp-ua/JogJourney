@@ -1,10 +1,12 @@
 package com.dp_ua.JogJourney.dba.service;
 
+import com.dp_ua.JogJourney.dba.element.StravaActivity;
 import com.dp_ua.JogJourney.dba.repo.StravaActivityRepo;
-import com.dp_ua.JogJourney.strava.entity.StravaActivity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -21,9 +23,15 @@ public class StravaActivityService {
         return repo.save(activity);
     }
 
-    public void saveOnlyNew(StravaActivity activity) {
+    public void saveOrUpdate(StravaActivity activity) {
         log.debug("Save activity: " + activity);
-        if (repo.findByActivityId(activity.getActivityId()).isEmpty()) {
+        Optional<StravaActivity> byActivityId = repo.findByActivityId(activity.getActivityId());
+        if (byActivityId.isPresent()) {
+            StravaActivity dbActivity = byActivityId.get();
+            dbActivity.applyChanges(activity);
+            repo.save(dbActivity);
+        }
+        if (byActivityId.isEmpty()) {
             repo.save(activity);
         }
     }

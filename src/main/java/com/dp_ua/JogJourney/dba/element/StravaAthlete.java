@@ -1,4 +1,4 @@
-package com.dp_ua.JogJourney.strava.entity;
+package com.dp_ua.JogJourney.dba.element;
 
 import com.dp_ua.JogJourney.dba.element.DomainElement;
 import com.fasterxml.jackson.annotation.JsonProperty;

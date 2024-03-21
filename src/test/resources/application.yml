@@ -11,6 +11,13 @@ telegram:
     reconnectTimeout: 10000
     adminId: 1234567890
 
+strava:
+  client:
+    id: ${STRAVA_CLIENT_ID}
+    secret: ${STRAVA_CLIENT_SECRET}
+  redirectionUrl: "http://localhost:8080/strava/redirect?chatId={chatId}"
+
+
 logging:
   level:
     root: INFO

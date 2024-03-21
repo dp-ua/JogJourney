@@ -1,8 +1,8 @@
 package com.dp_ua.JogJourney.strava;
 
 import com.dp_ua.JogJourney.exception.StravaApiException;
-import com.dp_ua.JogJourney.strava.entity.StravaAthlete;
-import com.dp_ua.JogJourney.strava.entity.StravaToken;
+import com.dp_ua.JogJourney.dba.element.StravaAthlete;
+import com.dp_ua.JogJourney.dba.element.StravaToken;
 import com.dp_ua.JogJourney.strava.entity.StravaTokenResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

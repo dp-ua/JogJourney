@@ -1,7 +1,7 @@
 package com.dp_ua.JogJourney.dba.service;
 
 import com.dp_ua.JogJourney.dba.repo.StravaTokenRepo;
-import com.dp_ua.JogJourney.strava.entity.StravaToken;
+import com.dp_ua.JogJourney.dba.element.StravaToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
